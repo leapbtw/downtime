@@ -1,0 +1,86 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.notenoughupdates.org/releases/" }
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven { url = "https://repo.nea.moe/releases" }
+    maven { url = "https://maven.shedaniel.me" }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "downtime" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "loader_version", project.loader_version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,
+                "minecraft_version": project.minecraft_version,
+                "loader_version": project.loader_version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    def projectName = project.name
+    inputs.property "projectName", projectName
+    archiveFileName = "${project.archives_base_name}-${project.version}-mc${project.minecraft_version}.jar"
+
+    from("LICENSE.txt") {
+        rename { "${it}_$projectName"}
+    }
+}
+
+// Dependency-free regression checks for the timer's clock and session semantics.
+sourceSets.test.compileClasspath += sourceSets.client.output
+sourceSets.test.runtimeClasspath += sourceSets.client.output
+tasks.named('test') {
+    // Tests below use a plain Java entrypoint rather than a JUnit engine.
+    failOnNoDiscoveredTests = false
+}
+tasks.register('timerTest', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'leapbtw.downtime.client.BreakTimerTest'
+}
+check.dependsOn timerTest

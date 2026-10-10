@@ -1,0 +1,18 @@
+{
+  "gui.downtime.button": "Downtime",
+  "gui.downtime.title": "Downtime settings",
+  "gui.downtime.interval": "Break every %s min",
+  "gui.downtime.save": "Save",
+  "gui.downtime.range": "30 min–4 h · 15 min steps",
+  "gui.downtime.warning": "Reminder 10 min before the break.",
+  "gui.downtime.next_cycle": "Changes apply to the next cycle.",
+  "gui.downtime.save_failed": "Could not save. Check the log.",
+  "chat.downtime.warning": "Break in 10 minutes.",
+  "chat.downtime.break": "Downtime!",
+  "chat.downtime.challenge": "%s = ?\nUse /downtime <answer> or return to the menu.",
+  "chat.downtime.status": "Next break: %1$s min %2$s s.",
+  "chat.downtime.resumed": "Timer restarted: %s min.",
+  "chat.downtime.incorrect": "Incorrect answer. Try again.",
+  "chat.downtime.break_active": "Break already active.",
+  "chat.downtime.minutes_added": "Added %s min to the timer."
+}

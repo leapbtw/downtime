@@ -1,0 +1,18 @@
+{
+  "gui.downtime.button": "Downtime",
+  "gui.downtime.title": "Impostazioni Downtime",
+  "gui.downtime.interval": "Pausa ogni %s min",
+  "gui.downtime.save": "Salva",
+  "gui.downtime.range": "30 min–4 h · Scatti di 15 min",
+  "gui.downtime.warning": "Avviso 10 min prima della pausa.",
+  "gui.downtime.next_cycle": "Modifiche dal prossimo ciclo.",
+  "gui.downtime.save_failed": "Salvataggio fallito. Controlla il log.",
+  "chat.downtime.warning": "Pausa tra 10 minuti.",
+  "chat.downtime.break": "Downtime!",
+  "chat.downtime.challenge": "%s = ?\nUsa /downtime <risultato> o torna al menu.",
+  "chat.downtime.status": "Prossima pausa: %1$s min %2$s s.",
+  "chat.downtime.resumed": "Timer riavviato: %s min.",
+  "chat.downtime.incorrect": "Risultato errato. Riprova.",
+  "chat.downtime.break_active": "Pausa già attiva.",
+  "chat.downtime.minutes_added": "Aggiunti %s min al timer."
+}

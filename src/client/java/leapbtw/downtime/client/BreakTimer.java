@@ -11,6 +11,7 @@ public final class BreakTimer {
     private boolean sampled;
     private boolean wasPlaying;
     private boolean warned;
+    private boolean postponed;
     private Challenge challenge;
 
     public Notice tick(long now, boolean playing, int minutes) {
@@ -28,12 +29,14 @@ public final class BreakTimer {
         if (addedMinutes < 0) throw new IllegalArgumentException("Minutes number must be positive");
         if (challenge != null) return Notice.NONE;
         // The clock only needs to reach the current deadline, even for very large input.
-        elapsed = Math.min(minutes * MINUTE, elapsed + Math.min(addedMinutes, minutes) * MINUTE);
+        int deadline = postponed ? 10 : minutes;
+        elapsed = Math.min(deadline * MINUTE, elapsed + Math.min(addedMinutes, deadline) * MINUTE);
         return checkThresholds(minutes);
     }
 
     private Notice checkThresholds(int minutes) {
-        if (elapsed >= minutes * MINUTE) {
+        int deadline = postponed ? 10 : minutes;
+        if (elapsed >= deadline * MINUTE) {
             challenge = Challenge.create(RandomGenerator.getDefault());
             return Notice.BREAK;
         }
@@ -49,29 +52,61 @@ public final class BreakTimer {
         sampled = false;
         wasPlaying = false;
         warned = false;
+        postponed = false;
         challenge = null;
     }
 
     public boolean answer(int answer) {
         if (challenge == null || challenge.answer() != answer) return false;
-        reset();
+        // Solving the challenge only grants ten more active minutes in sepia.
+        elapsed = 0;
+        sampled = false;
+        wasPlaying = false;
+        warned = true;
+        postponed = true;
+        challenge = null;
         return true;
     }
 
     public boolean isBreakDue() { return challenge != null; }
+    public boolean isPreBreak() { return warned && challenge == null; }
     public Challenge challenge() { return challenge; }
     public long remainingSeconds(int minutes) {
-        return Math.max(0, (minutes * MINUTE - elapsed + 999_999_999L) / 1_000_000_000L);
+        int deadline = postponed ? 10 : minutes;
+        return Math.max(0, (deadline * MINUTE - elapsed + 999_999_999L) / 1_000_000_000L);
     }
 
-    public record Challenge(int a, int b, int c) {
+    public record Challenge(int a, int b, Operation operation) {
+        public enum Operation { ADD, SUBTRACT, MULTIPLY }
+
         public static Challenge create(RandomGenerator random) {
-            return new Challenge(
-                    random.nextInt(100, 1000),
-                    random.nextInt(100, 1000),
-                    random.nextInt(100, 1000));
+            Operation operation = Operation.values()[random.nextInt(Operation.values().length)];
+            return switch (operation) {
+                case ADD -> {
+                    int a = random.nextInt(100);
+                    yield new Challenge(a, random.nextInt(100 - a), operation);
+                }
+                case SUBTRACT -> {
+                    int a = random.nextInt(100);
+                    yield new Challenge(a, random.nextInt(a + 1), operation);
+                }
+                case MULTIPLY -> new Challenge(random.nextInt(1, 10), random.nextInt(1, 10), operation);
+            };
         }
-        public int answer() { return a * b - c; }
-        public String expression() { return a + " × " + b + " − " + c; }
+        public int answer() {
+            return switch (operation) {
+                case ADD -> a + b;
+                case SUBTRACT -> a - b;
+                case MULTIPLY -> a * b;
+            };
+        }
+        public String expression() {
+            String symbol = switch (operation) {
+                case ADD -> "+";
+                case SUBTRACT -> "−";
+                case MULTIPLY -> "×";
+            };
+            return a + " " + symbol + " " + b;
+        }
     }
 }

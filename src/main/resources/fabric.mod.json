@@ -3,6 +3,7 @@
   "id": "downtime",
   "version": "${version}",
   "name": "downtime",
+  "icon": "assets/downtime/icon.png",
   "description": "Promemoria per le pause: timer di gioco, avviso, grayscale e quiz matematico.",
   "authors": [],
   "contact": {},
